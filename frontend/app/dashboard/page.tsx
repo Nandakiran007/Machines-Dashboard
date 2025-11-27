@@ -12,18 +12,48 @@ function Dashboard() {
   const { machines, loading, error } = useContext(MachineContext);
 
   return (
-    <div style={{ padding: 20 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Dashboard</h1>
-        <LogoutButton />
+      <div style={dashboardWrapper}>
+          <div style={headerRow}>
+              <h1 style={titleStyle}>Dashboard</h1>
+              <LogoutButton />
+          </div>
+
+          {loading && <p style={infoText}>Loading...</p>}
+          {error && <p style={errorText}>{error}</p>}
+
+          {!loading && !error && <MachineTable machines={machines} />}
       </div>
-
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {!loading && !error && <MachineTable machines={machines} />}
-    </div>
   );
 }
 
 export default withAuth(Dashboard);
+
+const dashboardWrapper: React.CSSProperties = {
+    padding: "2rem",
+    maxWidth: 1200,
+    margin: "0 auto",
+};
+
+const headerRow: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "1.5rem",
+};
+
+const titleStyle: React.CSSProperties = {
+    margin: 0,
+    fontSize: "2rem",
+    fontWeight: 600,
+    color: "var(--foreground)",
+};
+
+const infoText: React.CSSProperties = {
+    opacity: 0.7,
+};
+
+const errorText: React.CSSProperties = {
+    color: "tomato",
+    fontWeight: 500,
+};
+

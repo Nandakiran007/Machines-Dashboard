@@ -4,7 +4,6 @@ import { Machine } from "@/types/machine";
 import React, {
     createContext,
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useRef,

@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const MONGO_URL =
   process.env.MONGODB_URI || 'mongodb://localhost:27017/machinesdb';
 
-// Machine Schema
+// Schemas
 const TemperatureSampleSchema = new mongoose.Schema({
   value: { type: Number, required: true },
   updatedAt: { type: String, required: true },
@@ -29,21 +29,40 @@ const MachineSchema = new mongoose.Schema({
 
 const Machine = mongoose.model('Machine', MachineSchema);
 
+// Utility to generate multiple history entries
+function generateHistory(initialTemp) {
+  const base = Date.now();
+  const samples = [];
 
+  const randomShift = () => Math.floor(Math.random() * 12) - 6;
+
+  for (let i = 0; i < Math.floor(Math.random() * 8) + 4; i++) {
+    samples.push({
+      value: initialTemp + randomShift(),
+      updatedAt: new Date(base - i * 3600 * 1000).toISOString(), // hourly steps
+    });
+  }
+
+  return samples.reverse(); // oldest first
+}
+
+// --- 6 MACHINE DATA ----
 const machineData = [
   {
     id: 1,
     name: 'Lathe Machine',
     status: 'Running',
-    temperature: 75,
+    temperature: 66,
     energyConsumption: 800,
+    temperatureHistory: generateHistory(75),
   },
   {
     id: 2,
     name: 'CNC Milling Machine',
     status: 'Idle',
-    temperature: 65,
+    temperature: 64,
     energyConsumption: 800,
+    temperatureHistory: generateHistory(65),
   },
   {
     id: 3,
@@ -51,9 +70,33 @@ const machineData = [
     status: 'Stopped',
     temperature: 85,
     energyConsumption: 1500,
+    temperatureHistory: generateHistory(85),
+  },
+  {
+    id: 4,
+    name: 'Hydraulic Press',
+    status: 'Running',
+    temperature: 72,
+    energyConsumption: 950,
+    temperatureHistory: generateHistory(70),
+  },
+  {
+    id: 5,
+    name: '3D Printer',
+    status: 'Running',
+    temperature: 58,
+    energyConsumption: 300,
+    temperatureHistory: generateHistory(55),
+  },
+  {
+    id: 6,
+    name: 'Laser Cutting Machine',
+    status: 'Idle',
+    temperature: 62,
+    energyConsumption: 1200,
+    temperatureHistory: generateHistory(60),
   },
 ];
-
 
 async function seed() {
   try {
@@ -64,21 +107,10 @@ async function seed() {
     console.log('Clearing old data...');
     await Machine.deleteMany({});
 
-    // Add temperatureHistory for each machine
-    const enrichedData = machineData.map((m) => ({
-      ...m,
-      temperatureHistory: [
-        {
-          value: m.temperature,
-          updatedAt: new Date().toISOString(),
-        },
-      ],
-    }));
+    console.log('Inserting updated machines...');
+    await Machine.insertMany(machineData);
 
-    console.log('Inserting new machines...');
-    await Machine.insertMany(enrichedData);
-
-    console.log('Data inserted successfully.');
+    console.log('Seeding complete ✔');
   } catch (err) {
     console.error('Error inserting data:', err);
   } finally {
