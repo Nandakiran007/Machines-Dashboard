@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Machine, MachineDocument } from './schemas/machine.schema';
+import { MachinesGateway } from './machines.gateway';
 
 @Injectable()
 export class MachinesService {
-  constructor(@InjectModel(Machine.name) private machineModel: Model<MachineDocument>) {}
+  constructor(
+    @InjectModel(Machine.name) private machineModel: Model<MachineDocument>,
+    private readonly machinesGateway: MachinesGateway,
+  ) {}
 
   async findAll(): Promise<Machine[]> {
     return this.machineModel.find().lean().exec();
@@ -48,6 +52,12 @@ export class MachinesService {
   ).lean().exec();
 
   if (!updated) throw new NotFoundException('Machine not found');
+  try {
+    this.machinesGateway.emitReadingsUpdated(updated);
+  } catch (err) {
+    console.error('Failed to emit websocket event', err);
+  }
+
   return updated;
 }
 

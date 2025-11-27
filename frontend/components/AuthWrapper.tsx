@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import MachineContextProvider from "@/components/MachineProvider";
 
 export default function AuthWrapper({
   children,
@@ -15,5 +16,5 @@ export default function AuthWrapper({
     if (!token) router.replace("/login");
   }, []);
 
-  return <>{children}</>;
+  return <MachineContextProvider>{children}</MachineContextProvider>;
 }
