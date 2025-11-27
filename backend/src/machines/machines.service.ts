@@ -1,60 +1,54 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-export type Machine = {
-  id: number;
-  name: string;
-  status: string;
-  temperature: number;
-  energyConsumption: number;
-};
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Machine, MachineDocument } from './schemas/machine.schema';
 
 @Injectable()
 export class MachinesService {
-  private machines: Machine[] = [
-    {
-      id: 1,
-      name: 'Lathe Machine',
-      status: 'Running',
-      temperature: 75,
-      energyConsumption: 1200,
-    },
-    {
-      id: 2,
-      name: 'CNC Milling Machine',
-      status: 'Idle',
-      temperature: 65,
-      energyConsumption: 800,
-    },
-    {
-      id: 3,
-      name: 'Injection Molding Machine',
-      status: 'Stopped',
-      temperature: 85,
-      energyConsumption: 1500,
-    },
-  ];
+  constructor(@InjectModel(Machine.name) private machineModel: Model<MachineDocument>) {}
 
-  findAll(): Machine[] {
-    return this.machines;
+  async findAll(): Promise<Machine[]> {
+    return this.machineModel.find().lean().exec();
   }
 
-  findOne(id: number): Machine {
-    const m = this.machines.find((x) => x.id === id);
+  async findOne(id: number): Promise<Machine> {
+    const m = await this.machineModel.findOne({ id }).lean().exec();
     if (!m) throw new NotFoundException('Machine not found');
     return m;
   }
 
-  updateReadings(id: number, readings: Record<string, any>) {
-    const m = this.findOne(id);
-    if ('temperature' in readings && typeof readings.temperature === 'number') {
-      m.temperature = readings.temperature;
-    }
-    if ('energyConsumption' in readings && typeof readings.energyConsumption === 'number') {
-      m.energyConsumption = readings.energyConsumption;
-    }
-    if ('status' in readings && typeof readings.status === 'string') {
-      m.status = readings.status;
-    }
-    return m;
+  async updateReadings(id: number, readings: Record<string, any>): Promise<Machine> {
+  const update: Record<string, any> = {};
+  const historyPush: any[] = [];
+
+  if ('temperature' in readings && typeof readings.temperature === 'number') {
+    update.temperature = readings.temperature;
+
+    historyPush.push({
+      value: readings.temperature,
+      updatedAt: new Date().toISOString(),
+    });
   }
+
+  if ('energyConsumption' in readings && typeof readings.energyConsumption === 'number') {
+    update.energyConsumption = readings.energyConsumption;
+  }
+
+  if ('status' in readings && typeof readings.status === 'string') {
+    update.status = readings.status;
+  }
+
+  const updated = await this.machineModel.findOneAndUpdate(
+    { id },
+    {
+      $set: update,
+      ...(historyPush.length > 0 && { $push: { temperatureHistory: { $each: historyPush } } }),
+    },
+    { new: true }
+  ).lean().exec();
+
+  if (!updated) throw new NotFoundException('Machine not found');
+  return updated;
+}
+
 }

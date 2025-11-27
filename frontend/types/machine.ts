@@ -4,6 +4,10 @@ export interface Machine {
   status: string;
   temperature: number;
   energyConsumption: number;
-  details?: Record<string, any>;
-  temperatureHistory?: number[];
+  temperatureHistory?: TemperatureSample[];
+}
+
+export interface TemperatureSample {
+  value: number;
+  updatedAt: string;
 }

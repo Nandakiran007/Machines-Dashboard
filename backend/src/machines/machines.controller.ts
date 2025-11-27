@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, ParseIntPipe, UseGuards, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
 import { MachinesService } from './machines.service';
 import { JwtAuthGuard } from '../auth';
 import type { Request } from 'express';

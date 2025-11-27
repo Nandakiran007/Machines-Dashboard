@@ -49,15 +49,15 @@ export default function MachineDetailsPage() {
   if (!machine) return <p>No machine found.</p>;
 
   const chartData =
-    machine?.temperatureHistory ?? [];
+    machine?.temperatureHistory?.map((h) => ({ temp: h.value, time: h.updatedAt })) ?? [];
 
   return (
     <AuthWrapper>
       <div style={{ padding: 20 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <button onClick={() => router.back()}>&larr; Back</button>
-          </div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",padding:4 }}>
+          
+            <button style={{cursor: "pointer"}} onClick={() => router.back()}>&larr; Back</button>
+    
 
           <LogoutButton />
         </div>

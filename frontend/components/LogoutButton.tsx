@@ -29,6 +29,8 @@ export default function LogoutButton() {
         cursor: "pointer",
       }}
     >
+      <div style={{color:"#171717"}}>
+
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
@@ -44,8 +46,9 @@ export default function LogoutButton() {
         <polyline points="16 17 21 12 16 7" />
         <line x1="21" y1="12" x2="9" y2="12" />
       </svg>
+      </div>
 
-      <span>Logout</span>
+      <p style={{color:"#171717"}}>Logout</p>
     </button>
   );
 }
